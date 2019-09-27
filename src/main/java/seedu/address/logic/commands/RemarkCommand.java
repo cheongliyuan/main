@@ -33,6 +33,8 @@ public class RemarkCommand extends Command {
             + "r/ Likes to swim.";
 
     public static final String MESSAGE_ARGUMENTS = "Index: %1$d, Remark: %2$s";
+    public static final String MESSAGE_ADD_REMARK_SUCCESS = "Added remark to Person: %1$s";
+    public static final String MESSAGE_DELETE_REMARK_SUCCESS = "Removed remark from Person: %1$s";
 
     /**
      * @param index of the person in the filtered person list to edit the remark
@@ -47,7 +49,6 @@ public class RemarkCommand extends Command {
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
-        requireNonNull(model);
         List<Person> lastShownList = model.getFilteredPersonList();
 
         if (index.getZeroBased() >= lastShownList.size()) {
@@ -61,7 +62,7 @@ public class RemarkCommand extends Command {
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
-        throw new CommandException(String.format(MESSAGE_ARGUMENTS, index.getOneBased(), remark));
+        return new CommandResult(generateSuccessMessage(editedPerson));
     }
 
     @Override
@@ -80,5 +81,14 @@ public class RemarkCommand extends Command {
         RemarkCommand e = (RemarkCommand) other;
         return index.equals(e.index)
                 && remark.equals(e.remark);
+    }
+
+    /**
+     * Generates a command execution success message based on whether the remark is added to or removed from
+     * {@code personToEdit}.
+     */
+    private String generateSuccessMessage(Person personToEdit) {
+        String message = !remark.value.isEmpty() ? MESSAGE_ADD_REMARK_SUCCESS : MESSAGE_DELETE_REMARK_SUCCESS;
+        return String.format(message, personToEdit);
     }
 }
